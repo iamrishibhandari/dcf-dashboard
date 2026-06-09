@@ -7,7 +7,9 @@ ticker = st.text_input("Enter Stock Ticker (e.g. AAPL)", value="AAPL")
 
 if ticker:
     stock = yf.Ticker(ticker)
-    info = stock.info
+    import time
+time.sleep(2)
+info = stock.info
 
     st.subheader(f"{info.get('longName', ticker)}")
 
