@@ -7,36 +7,68 @@ st.set_page_config(page_title="DCF Valuation Dashboard", layout="wide", page_ico
 
 st.markdown("""
 <style>
-    .stApp { background-color: #0e1117; }
-    .main-header { 
-        background: linear-gradient(135deg, #1a1f2e, #16213e);
-        padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem;
-        border: 1px solid #2d3748;
+    .stApp { background-color: #f8fafc; }
+    
+    h1 { color: #0f172a !important; font-size: 2rem !important; font-weight: 700 !important; }
+    h2, h3 { color: #1e293b !important; font-weight: 600 !important; }
+    
+    .stCaption, .caption-text { color: #475569 !important; font-size: 0.85rem !important; font-weight: 500 !important; }
+    
+    div[data-testid="stMetricLabel"] { 
+        color: #475569 !important; font-size: 0.8rem !important; 
+        font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important;
     }
-    .metric-card {
-        background: #1a1f2e; border-radius: 10px;
-        padding: 1rem; border: 1px solid #2d3748;
+    div[data-testid="stMetricValue"] { color: #0f172a !important; font-size: 1.6rem !important; font-weight: 700 !important; }
+    
+    div[data-testid="metric-container"] {
+        background: #ffffff !important; border-radius: 12px !important;
+        padding: 1.2rem 1.5rem !important; border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
     }
-    .stMetric { background: #1a1f2e; border-radius: 10px; padding: 1rem; border: 1px solid #2d3748; }
-    div[data-testid="stMetricValue"] { color: #63b3ed; font-size: 1.8rem; }
-    div[data-testid="stMetricLabel"] { color: #a0aec0; }
-    .stSlider > div > div { background: #2d3748; }
-    h1, h2, h3 { color: #e2e8f0 !important; }
-    .stCaption { color: #718096 !important; }
-    .stTable { background: #1a1f2e; }
-    thead tr th { background: #2d3748 !important; color: #63b3ed !important; }
-    tbody tr td { color: #e2e8f0 !important; }
-    tbody tr:nth-child(even) { background: #1a1f2e !important; }
-    tbody tr:nth-child(odd) { background: #16213e !important; }
+    
+    .stTextInput > div > div > input {
+        background: #ffffff !important; border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important; color: #0f172a !important;
+        font-size: 1rem !important; font-weight: 500 !important;
+        padding: 0.6rem 1rem !important;
+    }
+    
+    .stSlider > label { color: #334155 !important; font-weight: 600 !important; font-size: 0.85rem !important; }
+    
+    .header-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+        padding: 2rem 2.5rem; border-radius: 16px; margin-bottom: 2rem;
+    }
+    .header-banner h1 { color: #ffffff !important; margin: 0 !important; }
+    .header-banner p { color: #94a3b8 !important; margin: 0.3rem 0 0 0 !important; font-size: 0.9rem !important; font-weight: 500 !important; }
+    
+    .section-label {
+        color: #64748b !important; font-size: 0.75rem !important;
+        font-weight: 700 !important; text-transform: uppercase !important;
+        letter-spacing: 0.08em !important; margin-bottom: 0.5rem !important;
+    }
+
+    .stSuccess { background: #f0fdf4 !important; border: 1px solid #86efac !important; color: #166534 !important; border-radius: 10px !important; }
+    .stError { background: #fff1f2 !important; border: 1px solid #fda4af !important; color: #9f1239 !important; border-radius: 10px !important; }
+    .stWarning { background: #fffbeb !important; border: 1px solid #fcd34d !important; color: #92400e !important; border-radius: 10px !important; }
+
+    thead tr th { background: #f1f5f9 !important; color: #334155 !important; font-weight: 700 !important; font-size: 0.85rem !important; }
+    tbody tr td { color: #1e293b !important; font-size: 0.9rem !important; }
+    tbody tr:nth-child(even) { background: #f8fafc !important; }
+    tbody tr:nth-child(odd) { background: #ffffff !important; }
+
+    hr { border-color: #e2e8f0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-header">', unsafe_allow_html=True)
-st.title("DCF Valuation Dashboard")
-st.caption("Built by Rishi Bhandari | Live market data via yfinance")
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="header-banner">
+    <h1>DCF Valuation Dashboard</h1>
+    <p>Built by Rishi Bhandari &nbsp;|&nbsp; Live market data via yfinance</p>
+</div>
+""", unsafe_allow_html=True)
 
-ticker = st.text_input("Enter Stock Ticker", value="AAPL", placeholder="e.g. AAPL, TSLA, MSFT").upper()
+ticker = st.text_input("Stock Ticker", value="AAPL", placeholder="e.g. AAPL, TSLA, MSFT").upper()
 
 def format_value(val):
     if abs(val) >= 1e12:
@@ -63,7 +95,7 @@ if ticker:
     market_cap = info.get('marketCap', 0)
 
     st.subheader(name)
-    st.caption(f"Sector: {sector}   |   Industry: {industry}")
+    st.markdown(f'<p class="section-label">Sector: {sector} &nbsp;|&nbsp; Industry: {industry}</p>', unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Current Price", f"${current_price:,.2f}")
@@ -73,7 +105,7 @@ if ticker:
 
     st.divider()
     st.subheader("DCF Assumptions")
-    st.caption("Adjust the sliders below to model different scenarios")
+    st.markdown('<p class="section-label">Adjust the sliders to model different scenarios</p>', unsafe_allow_html=True)
 
     col_a, col_b, col_c, col_d = st.columns(4)
     with col_a:
@@ -106,15 +138,14 @@ if ticker:
 
         st.divider()
         st.subheader("Projected vs Present Value of Free Cash Flows")
-        st.caption("Projected FCF = raw future cash flow | PV of FCF = discounted back to today's dollars")
+        st.markdown('<p class="section-label">Projected FCF = future cash flow &nbsp;|&nbsp; PV of FCF = discounted to today\'s dollars &nbsp;|&nbsp; Values in billions (USD)</p>', unsafe_allow_html=True)
 
         chart_data = pd.DataFrame({
-            "Projected FCF": [cf / 1e9 for cf in projected_fcf],
-            "PV of FCF (Discounted)": [pv / 1e9 for pv in pv_fcfs]
+            "Projected FCF ($B)": [cf / 1e9 for cf in projected_fcf],
+            "PV of FCF — Discounted ($B)": [pv / 1e9 for pv in pv_fcfs]
         }, index=[f"Year {i}" for i in range(1, years + 1)])
 
-        st.bar_chart(chart_data, color=["#63b3ed", "#68d391"])
-        st.caption("Values in billions (USD)")
+        st.bar_chart(chart_data, color=["#3b82f6", "#10b981"])
 
         st.divider()
         st.subheader("DCF Output")
@@ -132,7 +163,7 @@ if ticker:
             st.error(f"Downside vs Current Price: {upside:.1f}% — Stock appears OVERVALUED at current DCF assumptions")
 
         st.divider()
-        st.subheader("Valuation Summary Table")
+        st.subheader("Valuation Summary")
         summary = pd.DataFrame({
             "Metric": ["Current Market Price", "DCF Intrinsic Value", "Enterprise Value", "Market Cap", "Upside / Downside"],
             "Value": [
