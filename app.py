@@ -70,6 +70,22 @@ st.markdown("""
 
 ticker = st.text_input("Stock Ticker", value="AAPL", placeholder="e.g. AAPL, TSLA, MSFT").upper()
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_info(symbol):
+    """Fetch company info once per ticker per hour. Retries with backoff on rate limits."""
+    last_err = None
+    for attempt in range(3):
+        try:
+            data = yf.Ticker(symbol).info
+            # Yahoo sometimes returns a near-empty dict for bad/unknown tickers
+            if not data or data.get("currentPrice") is None and data.get("regularMarketPrice") is None:
+                return None
+            return data
+        except Exception as e:
+            last_err = e
+            time.sleep(2 ** attempt)  # 1s, 2s, 4s backoff
+    raise last_err
+
 def format_value(val):
     if abs(val) >= 1e12:
         return f"${val/1e12:.2f}T"
@@ -82,14 +98,23 @@ def format_value(val):
 
 if ticker:
     with st.spinner(f"Fetching live data for {ticker}..."):
-        stock = yf.Ticker(ticker)
-        time.sleep(2)
-        info = stock.info
+        try:
+            info = fetch_info(ticker)
+        except yf.exceptions.YFRateLimitError:
+            st.error("Yahoo Finance is rate-limiting requests right now (this is common on free shared hosting). Please wait a minute and try again.")
+            st.stop()
+        except Exception as e:
+            st.error(f"Could not fetch data for {ticker}. Yahoo may be temporarily unavailable. Try again shortly.")
+            st.stop()
+
+    if info is None:
+        st.warning(f"No data found for '{ticker}'. Double-check the ticker symbol (e.g. AAPL, MSFT, TSLA).")
+        st.stop()
 
     name = info.get('longName', ticker)
     sector = info.get('sector', 'N/A')
     industry = info.get('industry', 'N/A')
-    current_price = info.get('currentPrice', 0)
+    current_price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
     revenue = info.get('totalRevenue', 0)
     net_income = info.get('netIncomeToCommon', 0)
     market_cap = info.get('marketCap', 0)
